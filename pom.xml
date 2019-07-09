@@ -65,6 +65,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
+                            <mainClass>me.dekimpe.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

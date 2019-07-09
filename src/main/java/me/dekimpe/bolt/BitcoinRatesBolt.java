@@ -17,20 +17,21 @@ import org.apache.storm.tuple.Tuple;
  * @author cdekimpe
  */
 public class BitcoinRatesBolt extends BaseRichBolt {
+    int valeurBitcoin = 5000;
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer ofd) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void prepare(Map map, TopologyContext tc, OutputCollector oc) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void execute(Tuple tuple) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

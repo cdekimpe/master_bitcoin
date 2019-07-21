@@ -12,19 +12,41 @@ import org.apache.storm.kafka.spout.KafkaSpoutConfig;
  *
  * @author Coreuh
  */
-public class BitcoinRatesSpout extends KafkaSpout {
+public class BitcoinRatesSpout<String, String> extends KafkaSpout {
+    
+    static const String topic = "bitcoin-rates-test";
+    
+    static const String consumerGroup = "bitcoin-rates-consumers-test";
+    
+    static const String zookeeper = "zoo1:2182,zoo2:2182,zoo3:2182";
+    
+    static const String kafkaBrokers = "kafka1:9092,kafka2:9092,kafka3:9093";
     
     public BitcoinRatesSpout(KafkaSpoutConfig kafkaSpoutConfig) {
+        
+        // ZooKeeper connection string
+        BrokerHosts hosts = new ZkHosts(zookeeper);
+
+        //Creating SpoutConfig Object
+        SpoutConfig spoutConfig = new SpoutConfig(hosts, 
+           topicName, "/" + topicName UUID.randomUUID().toString());
+
+        //convert the ByteBuffer to String.
+        spoutConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+
+        //Assign SpoutConfig to KafkaSpout.
+        KafkaSpout kafkaSpout = new KafkaSpout(spoutConfig);
+        
         super(kafkaSpoutConfig);
         KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder =
-                KafkaSpoutConfig.builder("kafka1:9092", "bitcoin-rates-test");
+                KafkaSpoutConfig.builder(kafkaBrokers, topic);
         
         // On définit ici le groupe Kafka auquel va appartenir le spout
-        spoutConfigBuilder.setGroupId("bitcoin-rates-consumers-test");
+        spoutConfigBuilder.setGroupId(consumerGroup);
         // Création d'un objet KafkaSpoutConfig
         
         // Création d'un objet KafkaSpout
-        builder.setSpout("bitcoin-rates-spout", new KafkaSpout<String, String>(spoutConfig));
+        
         KafkaSpoutConfig<String, String> spoutConfig = spoutConfigBuilder.build();
     }
     

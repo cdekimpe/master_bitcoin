@@ -54,13 +54,16 @@ public class SaveRatesBolt extends BaseRichBolt {
                 .put("client.transport.sniff", "true").build();
         
         TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic1"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic2"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic3"), 9300));
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-1"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
         
         IndexResponse response = client.prepareIndex("bitcoin-test", "rates")
                 .setSource(input.getStringByField("value"), XContentType.JSON)
                 .get();
+
+        // Vérifier si la réponse est correcte
+        // Sinon envoyer une exception pour signaler le mauvais traitement.
         
         // Shutdown connection to ES cluster
         client.close();

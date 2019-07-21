@@ -5,12 +5,18 @@
  */
 package me.dekimpe.bolt;
 
+import java.net.InetAddress;
 import java.util.Map;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 /**
  *
@@ -37,14 +43,19 @@ public class SaveRatesBolt extends BaseRichBolt {
         } catch (Exception e) {
             e.printStackTrace();
             outputCollector.fail(input);
+        }
     }
     
-    public void process(Tuple input) throws Exception {
-        TransportClient client = new PreBuiltTransportClient(Settings.EMPTY)
-                .addTransportAddress(new TransportAddress(InetAddress.getByName("host1"), 9300))
-                .addTransportAddress(new TransportAddress(InetAddress.getByName("host2"), 9300));
+    private void process(Tuple input) throws Exception {
+        // on startup
+        Settings settings = Settings.builder()
+                .put("cluster.name", "projet3").build();
+        TransportClient client = new PreBuiltTransportClient(settings)
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic1"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic2"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic3"), 9300));
 
-        // on shutdown
+// on shutdown
         client.close();
     }
     

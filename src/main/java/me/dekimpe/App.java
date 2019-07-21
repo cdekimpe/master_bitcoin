@@ -1,6 +1,7 @@
 package me.dekimpe;
 
-import me.dekimpe.bolt.BitcoinRatesBolt;
+import me.dekimpe.bolt.SaveRatesBolt;
+import me.dekimpe.spout.GetRatesSpout;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
@@ -24,7 +25,7 @@ public class App
         
         
         // Création d'un Bolt pour gérer les rates
-        builder.setBolt("bitcoins-rates-bolt", new BitcoinRatesBolt())
+        builder.setBolt("bitcoins-rates-bolt", new SaveRatesBolt())
                 .shuffleGrouping("bitcoin-rates-spout");
         
         StormTopology topology = builder.createTopology();

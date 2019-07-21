@@ -12,19 +12,19 @@ import org.apache.storm.kafka.spout.KafkaSpoutConfig;
  *
  * @author Coreuh
  */
-public class BitcoinRatesSpout<String, String> extends KafkaSpout {
+public class GetRatesSpout {
     
-    static const String topic = "bitcoin-rates-test";
+    private String topic = "bitcoin-rates-test";
     
-    static const String consumerGroup = "bitcoin-rates-consumers-test";
+    private String consumerGroup = "bitcoin-rates-consumers-test";
     
-    static const String zookeeper = "zoo1:2182,zoo2:2182,zoo3:2182";
+    private String zookeeper = "zoo1:2182,zoo2:2182,zoo3:2182";
     
-    static const String kafkaBrokers = "kafka1:9092,kafka2:9092,kafka3:9093";
+    private String kafkaBrokers = "kafka1:9092,kafka2:9092,kafka3:9093";
     
-    public BitcoinRatesSpout(KafkaSpoutConfig kafkaSpoutConfig) {
+    public GetRatesSpout(KafkaSpoutConfig kafkaSpoutConfig) {
         
-        // ZooKeeper connection string
+        /* ZooKeeper connection string
         BrokerHosts hosts = new ZkHosts(zookeeper);
 
         //Creating SpoutConfig Object
@@ -47,7 +47,7 @@ public class BitcoinRatesSpout<String, String> extends KafkaSpout {
         
         // Création d'un objet KafkaSpout
         
-        KafkaSpoutConfig<String, String> spoutConfig = spoutConfigBuilder.build();
+        KafkaSpoutConfig<String, String> spoutConfig = spoutConfigBuilder.build();*/
     }
     
 }

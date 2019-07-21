@@ -16,8 +16,8 @@ import org.apache.storm.tuple.Tuple;
  *
  * @author cdekimpe
  */
-public class BitcoinRatesBolt extends BaseRichBolt {
-    int valeurBitcoin = 5000;
+public class SaveRatesBolt extends BaseRichBolt {
+    private OutputCollector outputCollector;
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer ofd) {
@@ -30,8 +30,22 @@ public class BitcoinRatesBolt extends BaseRichBolt {
     }
 
     @Override
-    public void execute(Tuple tuple) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void execute(Tuple input) {
+        try {
+            process(input);
+            outputCollector.ack(input);
+        } catch (Exception e) {
+            e.printStackTrace();
+            outputCollector.fail(input);
+    }
+    
+    public void process(Tuple input) throws Exception {
+        TransportClient client = new PreBuiltTransportClient(Settings.EMPTY)
+                .addTransportAddress(new TransportAddress(InetAddress.getByName("host1"), 9300))
+                .addTransportAddress(new TransportAddress(InetAddress.getByName("host2"), 9300));
+
+        // on shutdown
+        client.close();
     }
     
 }

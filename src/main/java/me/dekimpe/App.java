@@ -31,7 +31,7 @@ public class App
         
         // Création d'un Bolt pour gérer les rates
         builder.setBolt("bitcoins-rates-bolt", new SaveRatesBolt())
-                .shuffleGrouping("bitcoin-rates-spout");
+                .shuffleGrouping("bitcoins-rates-spout");
         
         StormTopology topology = builder.createTopology();
         Config config = new Config();

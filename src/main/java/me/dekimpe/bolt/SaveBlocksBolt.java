@@ -5,26 +5,29 @@
  */
 package me.dekimpe.bolt;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.storm.shade.org.json.simple.JSONObject;
+import org.apache.storm.shade.org.json.simple.parser.JSONParser;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
-import org.elasticsearch.action.index.IndexResponse;
+import org.apache.storm.tuple.Values;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 /**
  *
  * @author cdekimpe
  */
-public class SaveRatesBolt extends BaseRichBolt {
+public class SaveBlocksBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
 
     @Override
@@ -58,10 +61,19 @@ public class SaveRatesBolt extends BaseRichBolt {
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic2"), 9300))
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic3"), 9300));
         
-        IndexResponse response = client.prepareIndex("bitcoin-test", "rates")
-                .setSource(input.getStringByField("value"), XContentType.JSON)
-                .get();
+        JSONParser jsonParser = new JSONParser();
+	JSONObject obj = (JSONObject)jsonParser.parse(input.getStringByField("value"));
+	String contract = (String)obj.get("contract_name");
+	Long availableStands = (Long)obj.get("available_bike_stands");
+	Long stationNumber = (Long)obj.get("number");
+		
+	outputCollector.emit(new Values(contract, stationNumber, availableStands));
+	outputCollector.ack(input);
         
+        Map<String, Object> json = new HashMap<>();
+        json.put("timestamp", input.getStringByField("timestamp"));
+        json.put("eur", input.getStringByField("eur"));
+
         // Shutdown connection to ES cluster
         client.close();
     }

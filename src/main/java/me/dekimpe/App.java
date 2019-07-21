@@ -23,6 +23,11 @@ public class App
     {
         TopologyBuilder builder = new TopologyBuilder();
         
+        // Appel du Spout pour Kafka
+        KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder = KafkaSpoutConfig.builder("storm1", "Projet3");
+    	spoutConfigBuilder.setGroupId("rates-consumer-tests");
+    	KafkaSpoutConfig<String, String> spoutConfig = spoutConfigBuilder.build();
+    	builder.setSpout("bitcoins-rates-spout", new KafkaSpout<String, String>(spoutConfig));
         
         // Création d'un Bolt pour gérer les rates
         builder.setBolt("bitcoins-rates-bolt", new SaveRatesBolt())
@@ -31,7 +36,7 @@ public class App
         StormTopology topology = builder.createTopology();
         Config config = new Config();
     	config.setMessageTimeoutSecs(60*30);
-    	String topologyName = "bitcoins";
+    	String topologyName = "bitcoins-tests";
         
         StormSubmitter.submitTopology(topologyName, config, topology);
     }

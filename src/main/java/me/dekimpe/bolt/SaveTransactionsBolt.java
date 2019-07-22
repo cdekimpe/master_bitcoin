@@ -8,11 +8,14 @@ package me.dekimpe.bolt;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.storm.shade.org.json.simple.JSONObject;
+import org.apache.storm.shade.org.json.simple.parser.JSONParser;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -24,7 +27,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
  *
  * @author cdekimpe
  */
-public class SaveRatesBolt extends BaseRichBolt {
+public class SaveTransactionsBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
 
     @Override
@@ -58,8 +61,18 @@ public class SaveRatesBolt extends BaseRichBolt {
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-2", "rate")
-                .setSource(input.getStringByField("value"), XContentType.JSON)
+        JSONParser jsonParser = new JSONParser();
+	JSONObject obj = (JSONObject)jsonParser.parse(input.getStringByField("value"));
+	String hash = (String)obj.get("hash");
+	int timestamp = (int)obj.get("timestamp");
+	float amount = (float)obj.get("amount");
+        String json = "{\"timestamp\": " + Integer.toString(timestamp) + ", \"amount\": " + Float.toString(amount) + ", \"hash\": " + hash + "\"}";
+		
+	//outputCollector.emit(new Values(contract, stationNumber, availableStands));
+	//outputCollector.ack(input);
+        
+        IndexResponse response = client.prepareIndex("bitcoin-test-2", "transaction")
+                .setSource(json, XContentType.JSON)
                 .get();
 
         // Vérifier si la réponse est correcte

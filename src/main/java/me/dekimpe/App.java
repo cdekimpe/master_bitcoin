@@ -24,14 +24,14 @@ public class App
         TopologyBuilder builder = new TopologyBuilder();
         
         // Kafa : bitcoin-rates-test
-        KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "bitcoin-rates-test");
-    	spoutConfigBuilder.setGroupId("rates-consumer-tests-3");
+        KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "topics-rates");
+    	spoutConfigBuilder.setGroupId("rates-consumer");
     	KafkaSpoutConfig<String, String> spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-rates-spout", new KafkaSpout<String, String>(spoutConfig));
         
         // Kafa : bitcoin-transactions-test
-        spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "bitcoin-transactions-test");
-    	spoutConfigBuilder.setGroupId("transactions-consumer-tests-3");
+        spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "topic-transactions");
+    	spoutConfigBuilder.setGroupId("transactions-consumer");
     	spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-transactions-spout", new KafkaSpout<String, String>(spoutConfig));
         

@@ -55,7 +55,7 @@ public class App
         
         StormTopology topology = builder.createTopology();
         Config config = new Config();
-        config.setNumWorkers(3);
+        config.setNumWorkers(9);
     	String topologyName = "bitcoins-tests";
         
         StormSubmitter.submitTopology(topologyName, config, topology);

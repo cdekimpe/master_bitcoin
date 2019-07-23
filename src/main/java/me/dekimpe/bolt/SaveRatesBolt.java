@@ -58,7 +58,7 @@ public class SaveRatesBolt extends BaseRichBolt {
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-2", "rate")
+        IndexResponse response = client.prepareIndex("bitcoin-test-3", "rate")
                 .setSource(input.getStringByField("value"), XContentType.JSON)
                 .get();
 

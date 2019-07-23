@@ -24,7 +24,7 @@ public class App
         TopologyBuilder builder = new TopologyBuilder();
         
         // Kafa : bitcoin-rates-test
-        KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "topics-rates");
+        KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "topic-rates");
     	spoutConfigBuilder.setGroupId("rates-consumer");
     	KafkaSpoutConfig<String, String> spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-rates-spout", new KafkaSpout<String, String>(spoutConfig));

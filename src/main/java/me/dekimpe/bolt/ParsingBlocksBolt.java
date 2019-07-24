@@ -49,6 +49,7 @@ public class ParsingBlocksBolt extends BaseRichBolt {
         Float reward = (Float) obj.get("reward");
         String hash = (String) obj.get("hash");
         String foundBy = (String) obj.get("foundBy");
+        
         outputCollector.emit(new Values(foundBy, timestamp, reward, hash));
         outputCollector.ack(input);
     }

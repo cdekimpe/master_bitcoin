@@ -48,6 +48,13 @@ public class ParsingTransactionsBolt extends BaseRichBolt {
         String hash = (String) obj.get("hash");
         Long timestamp = (Long) obj.get("timestamp");
         Float amount = (Float) obj.get("amount");
+        
+        String json = "{\"timestamp\": " + timestamp + ", "
+                + "\"amount\": " + amount + ", "
+                + "\"hash\": \"" + hash + "\"}";
+        
+        System.out.println(json);
+        
         outputCollector.emit(new Values(timestamp, amount, hash));
         outputCollector.ack(input);
     }

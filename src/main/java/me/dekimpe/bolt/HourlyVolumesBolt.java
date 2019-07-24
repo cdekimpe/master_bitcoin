@@ -5,6 +5,7 @@
  */
 package me.dekimpe.bolt;
 
+import java.util.Date;
 import java.util.Map;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -56,6 +57,9 @@ public class HourlyVolumesBolt extends BaseWindowedBolt {
             outputCollector.ack(input);
         }
         
+        if (timestamp == 0) {
+            timestamp = new Date().getTime() / 1000;
+        }
         float averageEurValue = totalEurValue / totalEurTuples;
         float eurValue = totalBitValue * averageEurValue;
 

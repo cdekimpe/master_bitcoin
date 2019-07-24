@@ -6,16 +6,12 @@
 package me.dekimpe.bolt;
 
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.storm.shade.org.json.simple.JSONObject;
-import org.apache.storm.shade.org.json.simple.parser.JSONParser;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;

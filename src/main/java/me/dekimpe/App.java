@@ -1,7 +1,6 @@
 package me.dekimpe;
 
-import me.dekimpe.bolt.SaveRatesBolt;
-import me.dekimpe.bolt.SaveTransactionsBolt;
+import me.dekimpe.bolt.*;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
@@ -11,6 +10,8 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.topology.base.BaseWindowedBolt;
+import org.apache.storm.tuple.Fields;
 
 /**
  * Hello world!
@@ -35,23 +36,40 @@ public class App
     	spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-transactions-spout", new KafkaSpout<String, String>(spoutConfig));
         
-        /* Kafa : bitcoin-blocks-test
-        spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "bitcoin-blocks-test");
+        // Kafa : bitcoin-blocks-test
+        spoutConfigBuilder = KafkaSpoutConfig.builder("storm-nimbus:9092", "topic-blocks");
     	spoutConfigBuilder.setGroupId("blocks-consumer-tests");
     	spoutConfig = spoutConfigBuilder.build();
-    	builder.setSpout("bitcoins-blocks-spout", new KafkaSpout<String, String>(spoutConfig));*/
+    	builder.setSpout("bitcoins-blocks-spout", new KafkaSpout<String, String>(spoutConfig));
         
-        // Création d'un Bolt pour gérer les rates
-        builder.setBolt("bitcoins-rates-bolt", new SaveRatesBolt())
-                .shuffleGrouping("bitcoins-rates-spout");
-        
-        // Création d'un Bolt pour gérer les transactions
-        builder.setBolt("bitcoins-transactions-bolt", new SaveTransactionsBolt())
+        // Bitcoins Volumes Transfered
+        builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000*60*1)))
+                .shuffleGrouping("bitcoins-rates-spout")
                 .shuffleGrouping("bitcoins-transactions-spout");
         
-        /* Création d'un Bolt pour gérer les transactions
+        // Bitcoins Max Transfered
+        builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000*60*1)))
+                .shuffleGrouping("bitcoins-rates-spout")
+                .shuffleGrouping("bitcoins-transactions-spout");
+        
+        // Best Miner
+        builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000*60*1)))
+                .shuffleGrouping("bitcoins-rates-spout")
+                .fieldsGrouping("bitcoins-blocks-spout", new Fields("foundBy"));
+        
+        // Enregistrements des spouts dans ES à les des Save***Bolt
+        builder.setBolt("bitcoins-rates-bolt", new SaveRatesBolt())
+                .shuffleGrouping("bitcoins-rates-spout");
+        builder.setBolt("bitcoins-transactions-bolt", new SaveTransactionsBolt())
+                .shuffleGrouping("bitcoins-transactions-spout");
         builder.setBolt("bitcoins-blocks-bolt", new SaveBlocksBolt())
-                .shuffleGrouping("bitcoins-blocks-spout");*/
+                .shuffleGrouping("bitcoins-blocks-spout");
+        builder.setBolt("save-max-bolt", new SaveHourlyMaxBolt())
+                .shuffleGrouping("bitoins-max-transfered");
+        builder.setBolt("save-volume-transfered", new SaveHourlyVolumesBolt())
+                .shuffleGrouping("bitcoins-volume-transfered");
+        builder.setBolt("save-best-miner", new SaveBestMinerBolt())
+                .shuffleGrouping("bitcoins-best-miner");
         
         StormTopology topology = builder.createTopology();
         Config config = new Config();

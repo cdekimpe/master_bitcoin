@@ -12,7 +12,6 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
-
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -24,7 +23,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
  *
  * @author cdekimpe
  */
-public class SaveBlocksBolt extends BaseRichBolt {
+public class SaveHourlyVolumesBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
 
     @Override
@@ -54,21 +53,25 @@ public class SaveBlocksBolt extends BaseRichBolt {
                 .put("client.transport.sniff", "true").build();
         
         TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic1"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic2"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("elastic3"), 9300));
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-1"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
         
         // Récupération des données du input et transformation en JSON :
-        // Input example : {"foundBy": "F2Pool", "timestamp": 1563961597, "reward": 12.5, "hash": "000000000000000000086c5c7ffcfd31431fbeaaed62c582e72d79db49f07fac"}
-        String json = "{\"foundBy\": \"" + input.getStringByField("foundBy") + "\", "
-                + "\"timestamp\": " + input.getLongByField("timestamp") + ", "
-                + "\"reward\": " + input.getFloatByField("reward") + ", "
-                + "\"hash\": \"" + input.getStringByField("hash") + "\"}";
+        // Declarer : declarer.declare(new Fields("timestamp", "totalBitcoin", "eurValue", "averageEur"));
+        // Types : Long, Float, Float, Float
+        String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
+                + "\"totalBitcoin\": " + input.getFloatByField("totalBitcoin") + ","
+                + "\"eurValue\": " + input.getFloatByField("eurValue") + ","
+                + "\"averageEur\": " + input.getFloatByField("averageEur") + "}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-3", "block")
+        IndexResponse response = client.prepareIndex("bitcoin-test-3", "hourlyVolumes")
                 .setSource(json, XContentType.JSON)
                 .get();
 
+        // Vérifier si la réponse est correcte
+        // Sinon envoyer une exception pour signaler le mauvais traitement.
+        
         // Shutdown connection to ES cluster
         client.close();
     }

@@ -61,8 +61,14 @@ public class SaveTransactionsBolt extends BaseRichBolt {
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
         
+        // Récupération des données du input et transformation en JSON :
+        // Input example : {"timestamp": 1563961758, "amount": 0.00612958, "hash": "57fe6a1887f14d9df1036c8709a6daa1c5a2ccaae34a38ebb4235c5fb7386906"}
+        String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
+                + "\"amount\": " + input.getFloatByField("amount") + ", "
+                + "\"hash\": \"" + input.getStringByField("hash") + "\"}";
+        
         IndexResponse response = client.prepareIndex("bitcoin-test-3", "transaction")
-                .setSource(input.getStringByField("value"), XContentType.JSON)
+                .setSource(json, XContentType.JSON)
                 .get();
 
         // Vérifier si la réponse est correcte

@@ -57,8 +57,13 @@ public class SaveRatesBolt extends BaseRichBolt {
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
         
+        // Récupération des données du input et transformation en JSON :
+        // Input example : {"timestamp": 1563961571, "eur": 8734.6145}
+        String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
+                + "\"eur\": " + input.getFloatByField("eur") + "}";
+        
         IndexResponse response = client.prepareIndex("bitcoin-test-3", "rate")
-                .setSource(input.getStringByField("value"), XContentType.JSON)
+                .setSource(json, XContentType.JSON)
                 .get();
 
         // Vérifier si la réponse est correcte

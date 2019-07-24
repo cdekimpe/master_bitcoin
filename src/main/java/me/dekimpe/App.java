@@ -81,7 +81,7 @@ public class App
         
         StormTopology topology = builder.createTopology();
         Config config = new Config();
-        config.setNumWorkers(9);
+        config.setNumWorkers(4);
     	String topologyName = "Bitcoin-Management";
         
         StormSubmitter.submitTopology(topologyName, config, topology);

@@ -42,28 +42,36 @@ public class App
     	spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-blocks-spout", new KafkaSpout<String, String>(spoutConfig));
         
+        // Parsings
+        builder.setBolt("bitcoins-parsed-rates", new ParsingRatesBolt())
+                .shuffleGrouping("bitcoins-rates-spout");
+        builder.setBolt("bitcoins-parsed-transactions", new ParsingTransactionsBolt())
+                .shuffleGrouping("bitcoins-transactions-spout");
+        builder.setBolt("bitcoins-parsed-blocks", new ParsingBlocksBolt())
+                .shuffleGrouping("bitcoins-parsed-blocks");
+        
         // Bitcoins Volumes Transfered
         builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000*60*1)))
-                .shuffleGrouping("bitcoins-rates-spout")
+                .shuffleGrouping("bitcoins-parsed-rates")
                 .shuffleGrouping("bitcoins-transactions-spout");
         
         // Bitcoins Max Transfered
         builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000*60*1)))
-                .shuffleGrouping("bitcoins-rates-spout")
+                .shuffleGrouping("bitcoins-parsed-rates")
                 .shuffleGrouping("bitcoins-transactions-spout");
         
         // Best Miner
         builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000*60*1)))
-                .shuffleGrouping("bitcoins-rates-spout")
-                .fieldsGrouping("bitcoins-blocks-spout", new Fields("foundBy"));
+                .shuffleGrouping("bitcoins-parsed-rates")
+                .fieldsGrouping("bitcoins-parsed-blocks", new Fields("foundBy"));
         
         // Enregistrements des spouts dans ES à les des Save***Bolt
         builder.setBolt("bitcoins-rates-bolt", new SaveRatesBolt())
-                .shuffleGrouping("bitcoins-rates-spout");
+                .shuffleGrouping("bitcoins-parsed-rates");
         builder.setBolt("bitcoins-transactions-bolt", new SaveTransactionsBolt())
-                .shuffleGrouping("bitcoins-transactions-spout");
+                .shuffleGrouping("bitcoins-parsed-transactions");
         builder.setBolt("bitcoins-blocks-bolt", new SaveBlocksBolt())
-                .shuffleGrouping("bitcoins-blocks-spout");
+                .shuffleGrouping("bitcoins-parsed-blocks");
         builder.setBolt("save-max-bolt", new SaveHourlyMaxBolt())
                 .shuffleGrouping("bitoins-max-transfered");
         builder.setBolt("save-volume-transfered", new SaveHourlyVolumesBolt())

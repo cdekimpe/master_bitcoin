@@ -62,7 +62,7 @@ public class SaveRatesBolt extends BaseRichBolt {
         String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
                 + "\"eur\": " + input.getFloatByField("eur") + "}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-3", "rate")
+        IndexResponse response = client.prepareIndex("bitcoin-management", "rate")
                 .setSource(json, XContentType.JSON)
                 .get();
 

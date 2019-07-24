@@ -65,7 +65,7 @@ public class SaveHourlyMaxBolt extends BaseRichBolt {
                 + "\"eurValue\": " + input.getFloatByField("eurValue") + ","
                 + "\"averageEur\": " + input.getFloatByField("averageEur") + "}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-3", "hourlyVolumes")
+        IndexResponse response = client.prepareIndex("bitcoin-management", "max-value")
                 .setSource(json, XContentType.JSON)
                 .get();
 

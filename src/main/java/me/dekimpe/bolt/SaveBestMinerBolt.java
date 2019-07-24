@@ -66,7 +66,7 @@ public class SaveBestMinerBolt extends BaseRichBolt {
                 + "\"eurValue\": " + input.getFloatByField("eurValue") + ","
                 + "\"averageEur\": " + input.getFloatByField("averageEur") + "}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-3", "bestMiners")
+        IndexResponse response = client.prepareIndex("bitcoin-management", "best-miners")
                 .setSource(json, XContentType.JSON)
                 .get();
 

@@ -65,7 +65,7 @@ public class SaveBlocksBolt extends BaseRichBolt {
                 + "\"reward\": " + input.getFloatByField("reward") + ", "
                 + "\"hash\": \"" + input.getStringByField("hash") + "\"}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-3", "block")
+        IndexResponse response = client.prepareIndex("bitcoin-management", "block")
                 .setSource(json, XContentType.JSON)
                 .get();
 

@@ -63,7 +63,7 @@ public class SaveTransactionsBolt extends BaseRichBolt {
                 + "\"amount\": " + input.getFloatByField("amount") + ", "
                 + "\"hash\": \"" + input.getStringByField("hash") + "\"}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-test-3", "transaction")
+        IndexResponse response = client.prepareIndex("bitcoin-management", "transaction")
                 .setSource(json, XContentType.JSON)
                 .get();
 

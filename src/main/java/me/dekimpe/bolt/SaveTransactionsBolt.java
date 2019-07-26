@@ -60,6 +60,7 @@ public class SaveTransactionsBolt extends BaseRichBolt {
         
         // Récupération des données du input et transformation en JSON :
         // Input example : {"timestamp": 1563961758, "amount": 0.00612958, "hash": "57fe6a1887f14d9df1036c8709a6daa1c5a2ccaae34a38ebb4235c5fb7386906"}
+        String head = "{\"index\":{}}";
         String json = "{\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
                 + "\"amount\": " + input.getDoubleByField("amount") + ", "
                 + "\"hash\": \"" + input.getStringByField("hash") + "\"}";

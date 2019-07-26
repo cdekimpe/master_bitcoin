@@ -60,11 +60,11 @@ public class SaveHourlyVolumesBolt extends BaseRichBolt {
         
         // Récupération des données du input et transformation en JSON :
         // Declarer : declarer.declare(new Fields("timestamp", "totalBitcoin", "eurValue", "averageEur"));
-        // Types : Long, Float, Float, Float
-        String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
-                + "\"totalBitcoin\": " + input.getFloatByField("totalBitcoin") + ","
-                + "\"eurValue\": " + input.getFloatByField("eurValue") + ","
-                + "\"averageEur\": " + input.getFloatByField("averageEur") + "}";
+        // Types : Integer, Double, Double, Double
+        String json = "{\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
+                + "\"totalBitcoin\": " + input.getDoubleByField("totalBitcoin") + ","
+                + "\"eurValue\": " + input.getDoubleByField("eurValue") + ","
+                + "\"averageEur\": " + input.getDoubleByField("averageEur") + "}";
         
         IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "total-volume")
                 .setSource(json, XContentType.JSON)

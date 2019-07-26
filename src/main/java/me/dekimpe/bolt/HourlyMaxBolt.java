@@ -37,35 +37,32 @@ public class HourlyMaxBolt extends BaseWindowedBolt {
     // Input example : {"timestamp": 1563961758, "amount": 0.00612958, "hash": "57fe6a1887f14d9df1036c8709a6daa1c5a2ccaae34a38ebb4235c5fb7386906"}
     @Override
     public void execute(TupleWindow inputWindow) {
-        long timestamp = 0;
+        int timestamp = 0;
         int totalEurTuples = 0;
-        float totalEurValue = 0;
-        float maxBitValue = 0;
-        float newAmount;
+        double totalEurValue = 0;
+        double maxBitValue = 0;
+        double newAmount;
 		
         for (Tuple input : inputWindow.get()) {
             // If it is a Rate
             if (input.contains("eur")) {
-                totalEurValue += input.getFloatByField("eur");
+                totalEurValue += input.getDoubleByField("eur");
                 totalEurTuples++;
             }
             // If it is a Transaction
             else if (input.contains("amount")) {
-                newAmount = input.getFloatByField("amount");
+                newAmount = input.getDoubleByField("amount");
                 if(newAmount > maxBitValue) {
                     maxBitValue = newAmount;
                 }
             }
             // Get timestamp from last tuple
-            timestamp = input.getLongByField("timestamp");
+            timestamp = input.getIntegerByField("timestamp");
             outputCollector.ack(input);
         }
         
-        if (timestamp == 0) {
-            timestamp = new Date().getTime() / 1000;
-        }
-        float averageEurValue = totalEurValue / totalEurTuples;
-        float eurValue = maxBitValue * averageEurValue;
+        double averageEurValue = totalEurValue / totalEurTuples;
+        double eurValue = maxBitValue * averageEurValue;
 
         outputCollector.emit(new Values(timestamp, maxBitValue, eurValue, averageEurValue));
     }

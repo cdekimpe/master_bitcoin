@@ -60,11 +60,11 @@ public class SaveHourlyMaxBolt extends BaseRichBolt {
         
         // Récupération des données du input et transformation en JSON :
         // Declarer : declarer.declare(new Fields("timestamp", "totalBitcoin", "eurValue", "averageEur"));
-        // Types : Long, Float, Float, Float
-        String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
-                + "\"maxValue\": " + input.getFloatByField("maxValue") + ","
-                + "\"eurValue\": " + input.getFloatByField("eurValue") + ","
-                + "\"averageEur\": " + input.getFloatByField("averageEur") + "}";
+        // Types : Integer, Double, Double, Double
+        String json = "{\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
+                + "\"maxValue\": " + input.getDoubleByField("maxValue") + ","
+                + "\"eurValue\": " + input.getDoubleByField("eurValue") + ","
+                + "\"averageEur\": " + input.getDoubleByField("averageEur") + "}";
         
         IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "max-value")
                 .setSource(json, XContentType.JSON)

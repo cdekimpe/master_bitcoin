@@ -62,8 +62,8 @@ public class SaveBlocksBolt extends BaseRichBolt {
         // Récupération des données du input et transformation en JSON :
         // Input example : {"foundBy": "F2Pool", "timestamp": 1563961597, "reward": 12.5, "hash": "000000000000000000086c5c7ffcfd31431fbeaaed62c582e72d79db49f07fac"}
         String json = "{\"foundBy\": \"" + input.getStringByField("foundBy") + "\", "
-                + "\"timestamp\": " + input.getLongByField("timestamp") + ", "
-                + "\"reward\": " + input.getFloatByField("reward") + ", "
+                + "\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
+                + "\"reward\": " + input.getDoubleByField("reward") + ", "
                 + "\"hash\": \"" + input.getStringByField("hash") + "\"}";
         
         IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "block")

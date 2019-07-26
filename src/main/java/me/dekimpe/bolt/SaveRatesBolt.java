@@ -60,7 +60,7 @@ public class SaveRatesBolt extends BaseRichBolt {
         
         // Récupération des données du input et transformation en JSON :
         // Input example : {"timestamp": 1563961571, "eur": 8734.6145}
-        String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
+        String json = "{\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
                 + "\"eur\": " + input.getFloatByField("eur") + "}";
         
         IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "rate")

@@ -60,12 +60,12 @@ public class SaveBestMinerBolt extends BaseRichBolt {
         
         // Récupération des données du input et transformation en JSON :
         // Declarer : "timestamp", "miner", "value", "eurValue", "averageEur"
-        // Types : Long, Float, Float, Float, Float
-        String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
+        // Types : Long, Double, Double, Double, Double
+        String json = "{\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
                 + "\"foundBy\": \"" + input.getStringByField("miner") + "\", "
-                + "\"value\": " + input.getFloatByField("maxValue") + ","
-                + "\"eurValue\": " + input.getFloatByField("eurValue") + ","
-                + "\"averageEur\": " + input.getFloatByField("averageEur") + "}";
+                + "\"value\": " + input.getDoubleByField("maxValue") + ","
+                + "\"eurValue\": " + input.getDoubleByField("eurValue") + ","
+                + "\"averageEur\": " + input.getDoubleByField("averageEur") + "}";
         
         IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "best-miners")
                 .setSource(json, XContentType.JSON)

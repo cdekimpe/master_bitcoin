@@ -26,42 +26,42 @@ public class BestMinerBolt extends BaseWindowedBolt {
 
 	@Override
 	public void execute(TupleWindow inputWindow) {
-            long timestamp = 0;
+            int timestamp = 0;
             int totalEurTuples = 0;
-            float totalEurValue = 0;
-            HashMap<String, Float> miners = new HashMap<>();
+            double totalEurValue = 0;
+            HashMap<String, Double> miners = new HashMap<>();
 
             // Collect stats for all tuples
             // Block declarer : "foundBy", "timestamp", "reward", "hash"
-            // Block types : String, Long, Float, String
+            // Block types : String, Integer, Double, String
             // Rate declarer : "timestamp", "eur"
-            // Rate types : String, Float
+            // Rate types : String, Double
             Integer tupleCount = 0;
             for (Tuple input : inputWindow.get()) {
                 if (input.contains("eur")) {
-                    totalEurValue += input.getFloatByField("eur");
+                    totalEurValue += input.getDoubleByField("eur");
                     totalEurTuples++;
                 } else {
                     String foundBy = input.getStringByField("foundBy");
-                    Float reward = input.getFloatByField("reward");
-                    miners.putIfAbsent(foundBy, 0.0f);
+                    Double reward = input.getDoubleByField("reward");
+                    miners.putIfAbsent(foundBy, 0.0d);
                     miners.put(foundBy, reward + miners.get(foundBy));
                 }
-                timestamp = input.getLongByField("timestamp");
+                timestamp = input.getIntegerByField("timestamp");
                 outputCollector.ack(input);
             }
             
             String bestMiner = "";
-            float bestMinerValue = 0;
-            for (Entry<String, Float> miner : miners.entrySet()){
+            double bestMinerValue = 0;
+            for (Entry<String, Double> miner : miners.entrySet()){
                 if(miner.getValue() > bestMinerValue) {
                     bestMiner = miner.getKey();
                     bestMinerValue = miner.getValue();
                 }
             }
             
-            float averageEur = totalEurValue / totalEurTuples;
-            float eurValue = bestMinerValue * averageEur;
+            double averageEur = totalEurValue / totalEurTuples;
+            double eurValue = bestMinerValue * averageEur;
             
             outputCollector.emit(new Values(timestamp, bestMiner, bestMinerValue, eurValue, averageEur));            
 	}

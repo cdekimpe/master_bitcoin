@@ -6,9 +6,6 @@
 package me.dekimpe.bolt;
 
 import java.util.Map;
-import org.apache.storm.shade.org.json.simple.JSONObject;
-import org.apache.storm.shade.org.json.simple.parser.JSONParser;
-import org.apache.storm.shade.org.json.simple.parser.ParseException;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -16,6 +13,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.json.JSONObject;
 
 /**
  *
@@ -42,11 +40,10 @@ public class ParsingRatesBolt extends BaseRichBolt {
     }
     
     // Input example : {"timestamp": 1563961571, "eur": 8734.6145}
-    private void process(Tuple input) throws ParseException  {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject obj = (JSONObject) jsonParser.parse(input.getStringByField("value"));
-        Long timestamp = (Long) obj.get("timestamp");
-        Float amount = (Float) obj.get("eur");
+    private void process(Tuple input) {
+        JSONObject obj = new org.json.JSONObject(input.getStringByField("value"));
+        Integer timestamp = (Integer) obj.get("timestamp");
+        Double amount = (Double) obj.get("eur");
         outputCollector.emit(new Values(timestamp, amount));
         outputCollector.ack(input);
     }

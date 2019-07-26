@@ -13,12 +13,14 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import static org.elasticsearch.common.xcontent.XContentFactory.*;
 
 /**
  *
@@ -48,6 +50,7 @@ public class SaveTransactionsBolt extends BaseRichBolt {
     }
     
     private void process(Tuple input) throws Exception {
+        
         // Create a connection to ES cluster
         Settings settings = Settings.builder()
                 .put("cluster.name", ElasticConfig.CLUSTER_NAME)
@@ -68,6 +71,32 @@ public class SaveTransactionsBolt extends BaseRichBolt {
         IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "transaction")
                 .setSource(json, XContentType.JSON)
                 .get();
+        
+        /*BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+        // either use client#prepare, or use Requests# to directly build index/delete requests
+        bulkRequest.add(client.prepareIndex(ElasticConfig.INDEX, "transaction")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("user", "kimchy")
+                        .field("message", "trying out Elasticsearch")
+                        .endObject()
+                )
+        );
+
+        bulkRequest.add(client.prepareIndex("twitter", "tweet", "2")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("user", "kimchy")
+                        .field("message", "another post")
+                        .endObject()
+                )
+        );
+
+        BulkResponse bulkResponse = bulkRequest.get();
+        if (bulkResponse.hasFailures()) {
+            // process failures by iterating through each bulk response item
+        }*/
 
         // Vérifier si la réponse est correcte
         // Sinon envoyer une exception pour signaler le mauvais traitement.

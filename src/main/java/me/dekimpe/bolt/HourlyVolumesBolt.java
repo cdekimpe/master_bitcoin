@@ -33,11 +33,8 @@ public class HourlyVolumesBolt extends BaseWindowedBolt {
         outputCollector = oc;
     }
 
-    // Input example : {"timestamp": 1563961571, "eur": 8734.6145}
-    // Input example : {"timestamp": 1563961758, "amount": 0.00612958, "hash": "57fe6a1887f14d9df1036c8709a6daa1c5a2ccaae34a38ebb4235c5fb7386906"}
     @Override
     public void execute(TupleWindow inputWindow) {
-        boolean goOn = false;
         int timestamp = 0;
         int totalEurTuples = 0;
         double totalEurValue = 0;
@@ -54,17 +51,13 @@ public class HourlyVolumesBolt extends BaseWindowedBolt {
                 totalBitValue += input.getDoubleByField("amount");
             }
             // Get timestamp from last tuple
-            if (input.contains("timestamp")) {
-                timestamp = input.getIntegerByField("timestamp");
-                goOn = true;
-            }
+            timestamp = input.getIntegerByField("timestamp");
             outputCollector.ack(input);
         }
         
         double averageEurValue = totalEurValue / totalEurTuples;
         double eurValue = totalBitValue * averageEurValue;
-        if (goOn)
-            outputCollector.emit(new Values(timestamp, totalBitValue, eurValue, averageEurValue));
+        outputCollector.emit(new Values(timestamp, totalBitValue, eurValue, averageEurValue));
     }
     
 }

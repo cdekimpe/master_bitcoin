@@ -38,7 +38,6 @@ public class HourlyMaxBolt extends BaseWindowedBolt {
     @Override
     public void execute(TupleWindow inputWindow) {
         
-        boolean goOn = false;
         int timestamp = 0;
         int totalEurTuples = 0;
         double totalEurValue = 0;
@@ -60,19 +59,15 @@ public class HourlyMaxBolt extends BaseWindowedBolt {
                 }
             }
             // Get timestamp from last tuple
-            if (input.contains("timestamp")) {
-                timestamp = input.getIntegerByField("timestamp");
-                goOn = true;
-            }
-            
+            timestamp = input.getIntegerByField("timestamp");
+
             outputCollector.ack(input);
         }
         
         double averageEurValue = totalEurValue / totalEurTuples;
         double eurValue = maxBitValue * averageEurValue;
         
-        if (goOn)
-            outputCollector.emit(new Values(timestamp, maxBitValue, eurValue, averageEurValue));
+        outputCollector.emit(new Values(timestamp, maxBitValue, eurValue, averageEurValue));
     }
     
 }

@@ -16,13 +16,11 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.windowing.TupleWindow;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import static org.elasticsearch.common.xcontent.XContentFactory.*;
 
 /**
  *
@@ -80,14 +78,6 @@ public class SaveTransactionsBolt extends BaseWindowedBolt {
             }
         }
 
-        /*IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "transaction")
-                .setSource(json, XContentType.JSON)
-                .get();*/
-        
-        // Vérifier si la réponse est correcte
-        // Sinon envoyer une exception pour signaler le mauvais traitement.
-        
-        // Shutdown connection to ES cluster
         client.close();
     }
     

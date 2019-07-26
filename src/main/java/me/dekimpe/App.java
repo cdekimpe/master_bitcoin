@@ -52,20 +52,20 @@ public class App
         builder.setBolt("bitcoins-parsed-blocks", new ParsingBlocksBolt())
                 .shuffleGrouping("bitcoins-blocks-spout");
         
-        /* Bitcoins Volumes Transfered
-        builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(10000)))
+        //Bitcoins Volumes Transfered
+        builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60 * 2)))
                 .shuffleGrouping("bitcoins-parsed-rates")
-                .shuffleGrouping("bitcoins-transactions-spout");
+                .shuffleGrouping("bitcoins-parsed-transactions");
         
-        // Bitcoins Max Transfered
-        builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(10000)))
+        /// Bitcoins Max Transfered
+        builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60 * 2)))
                 .shuffleGrouping("bitcoins-parsed-rates")
-                .shuffleGrouping("bitcoins-transactions-spout");
+                .shuffleGrouping("bitcoins-parsed-transactions");
         
         // Best Miner
-        builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(10000)))
+        builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60 * 2)))
                 .shuffleGrouping("bitcoins-parsed-rates")
-                .fieldsGrouping("bitcoins-parsed-blocks", new Fields("foundBy"));*/
+                .fieldsGrouping("bitcoins-parsed-blocks", new Fields("foundBy"));
         
         // Enregistrements des spouts dans ES à les des Save***Bolt
         builder.setBolt("save-rates-bolt", new SaveRatesBolt())
@@ -74,12 +74,12 @@ public class App
                 .shuffleGrouping("bitcoins-parsed-transactions");
         builder.setBolt("save-blocks-bolt", new SaveBlocksBolt())
                 .shuffleGrouping("bitcoins-parsed-blocks");
-        /*builder.setBolt("save-max-bolt", new SaveHourlyMaxBolt())
-                .shuffleGrouping("bitoins-max-transfered");
         builder.setBolt("save-volume-transfered", new SaveHourlyVolumesBolt())
                 .shuffleGrouping("bitcoins-volume-transfered");
+        builder.setBolt("save-max-bolt", new SaveHourlyMaxBolt())
+                .shuffleGrouping("bitoins-max-transfered");
         builder.setBolt("save-best-miner", new SaveBestMinerBolt())
-                .shuffleGrouping("bitcoins-best-miner");*/
+                .shuffleGrouping("bitcoins-best-miner");
         
         StormTopology topology = builder.createTopology();
         Config config = new Config();

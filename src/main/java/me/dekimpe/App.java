@@ -1,6 +1,7 @@
 package me.dekimpe;
 
 import me.dekimpe.bolt.*;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
@@ -25,20 +26,20 @@ public class App
         TopologyBuilder builder = new TopologyBuilder();
         
         // Kafa : bitcoin-rates-test
-        KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder = KafkaSpoutConfig.builder("kafka1:9092", "topic-rates");
-    	spoutConfigBuilder.setGroupId("rates-consumer");
+        KafkaSpoutConfig.Builder<String, String> spoutConfigBuilder = KafkaSpoutConfig.builder("kafka1:9092", "topic-rates")
+                .setProp(ConsumerConfig.GROUP_ID_CONFIG, "consumer-rates");
     	KafkaSpoutConfig<String, String> spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-rates-spout", new KafkaSpout<String, String>(spoutConfig));
         
         // Kafa : bitcoin-transactions-test
-        spoutConfigBuilder = KafkaSpoutConfig.builder("kafka1:9092", "topic-transactions");
-    	spoutConfigBuilder.setGroupId("transactions-consumer");
+        spoutConfigBuilder = KafkaSpoutConfig.builder("kafka1:9092", "topic-transactions")
+                .setProp(ConsumerConfig.GROUP_ID_CONFIG, "consumer-transactions");
     	spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-transactions-spout", new KafkaSpout<String, String>(spoutConfig));
         
         // Kafa : bitcoin-blocks-test
-        spoutConfigBuilder = KafkaSpoutConfig.builder("kafka1:9092", "topic-blocks");
-    	spoutConfigBuilder.setGroupId("blocks-consumer");
+        spoutConfigBuilder = KafkaSpoutConfig.builder("kafka1:9092", "topic-blocks")
+                .setProp(ConsumerConfig.GROUP_ID_CONFIG, "consumer-blocks");
     	spoutConfig = spoutConfigBuilder.build();
     	builder.setSpout("bitcoins-blocks-spout", new KafkaSpout<String, String>(spoutConfig));
         

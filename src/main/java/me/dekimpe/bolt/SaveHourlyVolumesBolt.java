@@ -7,6 +7,7 @@ package me.dekimpe.bolt;
 
 import java.net.InetAddress;
 import java.util.Map;
+import me.dekimpe.ElasticConfig;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -49,13 +50,13 @@ public class SaveHourlyVolumesBolt extends BaseRichBolt {
     private void process(Tuple input) throws Exception {
         // Create a connection to ES cluster
         Settings settings = Settings.builder()
-                .put("cluster.name", "projet3")
+                .put("cluster.name", ElasticConfig.CLUSTER_NAME)
                 .put("client.transport.sniff", "true").build();
         
         TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-1"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST1), ElasticConfig.PORT))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST2), ElasticConfig.PORT))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST3), ElasticConfig.PORT));
         
         // Récupération des données du input et transformation en JSON :
         // Declarer : declarer.declare(new Fields("timestamp", "totalBitcoin", "eurValue", "averageEur"));
@@ -65,7 +66,7 @@ public class SaveHourlyVolumesBolt extends BaseRichBolt {
                 + "\"eurValue\": " + input.getFloatByField("eurValue") + ","
                 + "\"averageEur\": " + input.getFloatByField("averageEur") + "}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-management", "total-volume")
+        IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "total-volume")
                 .setSource(json, XContentType.JSON)
                 .get();
 

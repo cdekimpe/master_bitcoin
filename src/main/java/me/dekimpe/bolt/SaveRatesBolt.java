@@ -7,6 +7,7 @@ package me.dekimpe.bolt;
 
 import java.net.InetAddress;
 import java.util.Map;
+import me.dekimpe.ElasticConfig;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -49,20 +50,20 @@ public class SaveRatesBolt extends BaseRichBolt {
     private void process(Tuple input) throws Exception {
         // Create a connection to ES cluster
         Settings settings = Settings.builder()
-                .put("cluster.name", "projet3")
+                .put("cluster.name", ElasticConfig.CLUSTER_NAME)
                 .put("client.transport.sniff", "true").build();
         
         TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-1"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-2"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("storm-supervisor-3"), 9300));
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST1), ElasticConfig.PORT))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST2), ElasticConfig.PORT))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST3), ElasticConfig.PORT));
         
         // Récupération des données du input et transformation en JSON :
         // Input example : {"timestamp": 1563961571, "eur": 8734.6145}
         String json = "{\"timestamp\": " + input.getLongByField("timestamp") + ", "
                 + "\"eur\": " + input.getFloatByField("eur") + "}";
         
-        IndexResponse response = client.prepareIndex("bitcoin-management", "rate")
+        IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "rate")
                 .setSource(json, XContentType.JSON)
                 .get();
 

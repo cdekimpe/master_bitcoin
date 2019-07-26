@@ -49,7 +49,7 @@ public class App
         builder.setBolt("bitcoins-parsed-transactions", new ParsingTransactionsBolt())
                 .shuffleGrouping("bitcoins-transactions-spout");
         builder.setBolt("bitcoins-parsed-blocks", new ParsingBlocksBolt())
-                .shuffleGrouping("bitcoins-parsed-blocks");
+                .shuffleGrouping("bitcoins-blocks-spout");
         
         // Bitcoins Volumes Transfered
         builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(10000)))

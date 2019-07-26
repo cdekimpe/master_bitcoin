@@ -12,6 +12,7 @@ import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseWindowedBolt;
+import org.apache.storm.topology.base.BaseWindowedBolt.Count;
 import org.apache.storm.tuple.Fields;
 
 /**
@@ -69,7 +70,7 @@ public class App
         // Enregistrements des spouts dans ES à les des Save***Bolt
         builder.setBolt("save-rates-bolt", new SaveRatesBolt())
                 .shuffleGrouping("bitcoins-parsed-rates");
-        builder.setBolt("save-transactions-bolt", new SaveTransactionsBolt())
+        builder.setBolt("save-transactions-bolt", new SaveTransactionsBolt().withTumblingWindow(BaseWindowedBolt.Count.of(30)))
                 .shuffleGrouping("bitcoins-parsed-transactions");
         builder.setBolt("save-blocks-bolt", new SaveBlocksBolt())
                 .shuffleGrouping("bitcoins-parsed-blocks");

@@ -11,9 +11,11 @@ import me.dekimpe.ElasticConfig;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.topology.base.BaseWindowedBolt;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.windowing.TupleWindow;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -26,7 +28,7 @@ import static org.elasticsearch.common.xcontent.XContentFactory.*;
  *
  * @author cdekimpe
  */
-public class SaveTransactionsBolt extends BaseRichBolt {
+public class SaveTransactionsBolt extends BaseWindowedBolt {
     private OutputCollector outputCollector;
 
     @Override
@@ -39,17 +41,15 @@ public class SaveTransactionsBolt extends BaseRichBolt {
     }
 
     @Override
-    public void execute(Tuple input) {
+    public void execute(TupleWindow inputWindow) {
         try {
-            process(input);
-            outputCollector.ack(input);
+            process(inputWindow);
         } catch (Exception e) {
             e.printStackTrace();
-            outputCollector.fail(input);
         }
     }
     
-    private void process(Tuple input) throws Exception {
+    private void process(TupleWindow inputWindow) throws Exception {
         
         // Create a connection to ES cluster
         Settings settings = Settings.builder()
@@ -61,43 +61,29 @@ public class SaveTransactionsBolt extends BaseRichBolt {
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST2), ElasticConfig.PORT))
                 .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ElasticConfig.HOST3), ElasticConfig.PORT));
         
-        // Récupération des données du input et transformation en JSON :
-        // Input example : {"timestamp": 1563961758, "amount": 0.00612958, "hash": "57fe6a1887f14d9df1036c8709a6daa1c5a2ccaae34a38ebb4235c5fb7386906"}
-        String head = "{\"index\":{}}";
-        String json = "{\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
-                + "\"amount\": " + input.getDoubleByField("amount") + ", "
-                + "\"hash\": \"" + input.getStringByField("hash") + "\"}";
-        
-        IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "transaction")
-                .setSource(json, XContentType.JSON)
-                .get();
-        
-        /*BulkRequestBuilder bulkRequest = client.prepareBulk();
-
-        // either use client#prepare, or use Requests# to directly build index/delete requests
-        bulkRequest.add(client.prepareIndex(ElasticConfig.INDEX, "transaction")
-                .setSource(jsonBuilder()
-                        .startObject()
-                        .field("user", "kimchy")
-                        .field("message", "trying out Elasticsearch")
-                        .endObject()
-                )
-        );
-
-        bulkRequest.add(client.prepareIndex("twitter", "tweet", "2")
-                .setSource(jsonBuilder()
-                        .startObject()
-                        .field("user", "kimchy")
-                        .field("message", "another post")
-                        .endObject()
-                )
-        );
+        String json;
+        BulkRequestBuilder bulkRequest = client.prepareBulk();
+        for (Tuple input : inputWindow.get()) {
+            json = "{\"timestamp\": " + input.getIntegerByField("timestamp") + ", "
+                    + "\"amount\": " + input.getDoubleByField("amount") + ", "
+                    + "\"hash\": \"" + input.getStringByField("hash") + "\"}";
+            bulkRequest.add(client.prepareIndex(ElasticConfig.INDEX, "transaction")
+                    .setSource(json, XContentType.JSON));
+        }
 
         BulkResponse bulkResponse = bulkRequest.get();
-        if (bulkResponse.hasFailures()) {
-            // process failures by iterating through each bulk response item
-        }*/
+        for (Tuple input : inputWindow.get()) {
+            if (bulkResponse.hasFailures()) {
+                outputCollector.fail(input);
+            } else {
+                outputCollector.ack(input);
+            }
+        }
 
+        /*IndexResponse response = client.prepareIndex(ElasticConfig.INDEX, "transaction")
+                .setSource(json, XContentType.JSON)
+                .get();*/
+        
         // Vérifier si la réponse est correcte
         // Sinon envoyer une exception pour signaler le mauvais traitement.
         

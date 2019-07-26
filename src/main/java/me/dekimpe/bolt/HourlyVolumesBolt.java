@@ -52,12 +52,20 @@ public class HourlyVolumesBolt extends BaseWindowedBolt {
             }
             // Get timestamp from last tuple
             timestamp = input.getIntegerByField("timestamp");
-            outputCollector.ack(input);
         }
         
-        double averageEurValue = totalEurValue / totalEurTuples;
-        double eurValue = totalBitValue * averageEurValue;
-        outputCollector.emit(new Values(timestamp, totalBitValue, eurValue, averageEurValue));
+        if (totalEurTuples == 0 || totalBitValue == 0) {
+            for (Tuple input : inputWindow.get()) {
+                outputCollector.fail(input);
+            }
+        } else {
+            double averageEurValue = totalEurValue / totalEurTuples;
+            double eurValue = totalBitValue * averageEurValue;
+            for (Tuple input : inputWindow.get()) {
+                outputCollector.ack(input);
+            }
+            outputCollector.emit(new Values(timestamp, totalBitValue, eurValue, averageEurValue));
+        }
     }
     
 }

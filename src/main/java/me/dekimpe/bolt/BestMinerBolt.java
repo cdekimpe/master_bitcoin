@@ -26,8 +26,8 @@ public class BestMinerBolt extends BaseWindowedBolt {
 
 	@Override
 	public void execute(TupleWindow inputWindow) {
-            boolean goOn = false;
             int timestamp = 0;
+            int numMiners = 0;
             int totalEurTuples = 0;
             double totalEurValue = 0;
             HashMap<String, Double> miners = new HashMap<>();
@@ -37,7 +37,6 @@ public class BestMinerBolt extends BaseWindowedBolt {
             // Block types : String, Integer, Double, String
             // Rate declarer : "timestamp", "eur"
             // Rate types : String, Double
-            Integer tupleCount = 0;
             for (Tuple input : inputWindow.get()) {
                 if (input.contains("eur")) {
                     totalEurValue += input.getDoubleByField("eur");
@@ -47,29 +46,33 @@ public class BestMinerBolt extends BaseWindowedBolt {
                     Double reward = input.getDoubleByField("reward");
                     miners.putIfAbsent(foundBy, 0.0d);
                     miners.put(foundBy, reward + miners.get(foundBy));
+                    numMiners++;
                 }
                 // Get timestamp from last tuple
-                if (input.contains("timestamp")) {
-                    timestamp = input.getIntegerByField("timestamp");
-                    goOn = true;
-                }
-                outputCollector.ack(input);
+                timestamp = input.getIntegerByField("timestamp");
             }
             
-            String bestMiner = "";
-            double bestMinerValue = 0;
-            for (Entry<String, Double> miner : miners.entrySet()){
-                if(miner.getValue() > bestMinerValue) {
-                    bestMiner = miner.getKey();
-                    bestMinerValue = miner.getValue();
+            if (totalEurTuples == 0 || numMiners == 0) {
+                for (Tuple input : inputWindow.get()) {
+                    outputCollector.fail(input);
                 }
+            } else {
+                String bestMiner = "";
+                double bestMinerValue = 0;
+                for (Entry<String, Double> miner : miners.entrySet()){
+                    if(miner.getValue() > bestMinerValue) {
+                        bestMiner = miner.getKey();
+                        bestMinerValue = miner.getValue();
+                    }
+                }
+
+                double averageEur = totalEurValue / totalEurTuples;
+                double eurValue = bestMinerValue * averageEur;
+                for (Tuple input : inputWindow.get()) {
+                    outputCollector.ack(input);
+                }
+                outputCollector.emit(new Values(timestamp, bestMiner, bestMinerValue, eurValue, averageEur));
             }
-            
-            double averageEur = totalEurValue / totalEurTuples;
-            double eurValue = bestMinerValue * averageEur;
-            
-            if (goOn)
-                outputCollector.emit(new Values(timestamp, bestMiner, bestMinerValue, eurValue, averageEur));            
 	}
 
 	@Override

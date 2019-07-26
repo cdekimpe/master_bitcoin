@@ -12,7 +12,6 @@ import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseWindowedBolt;
-import org.apache.storm.topology.base.BaseWindowedBolt.Count;
 import org.apache.storm.tuple.Fields;
 
 /**
@@ -53,17 +52,17 @@ public class App
                 .shuffleGrouping("bitcoins-blocks-spout");
         
         //Bitcoins Volumes Transfered
-        builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 15)))
+        builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60)))
                 .shuffleGrouping("bitcoins-parsed-rates")
                 .shuffleGrouping("bitcoins-parsed-transactions");
         
         /// Bitcoins Max Transfered
-        builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 15)))
+        builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60)))
                 .shuffleGrouping("bitcoins-parsed-rates")
                 .shuffleGrouping("bitcoins-parsed-transactions");
         
         // Best Miner
-        builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 15)))
+        builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60)))
                 .shuffleGrouping("bitcoins-parsed-rates")
                 .fieldsGrouping("bitcoins-parsed-blocks", new Fields("foundBy"));
         

@@ -53,17 +53,17 @@ public class App
                 .shuffleGrouping("bitcoins-blocks-spout");
         
         //Bitcoins Volumes Transfered
-        builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60 * 2)))
+        builder.setBolt("bitcoins-volume-transfered", new HourlyVolumesBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 30)))
                 .shuffleGrouping("bitcoins-parsed-rates")
                 .shuffleGrouping("bitcoins-parsed-transactions");
         
         /// Bitcoins Max Transfered
-        builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60 * 2)))
+        builder.setBolt("bitoins-max-transfered", new HourlyMaxBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 30)))
                 .shuffleGrouping("bitcoins-parsed-rates")
                 .shuffleGrouping("bitcoins-parsed-transactions");
         
         // Best Miner
-        builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 60 * 2)))
+        builder.setBolt("bitcoins-best-miner", new BestMinerBolt().withTumblingWindow(BaseWindowedBolt.Duration.of(1000 * 30)))
                 .shuffleGrouping("bitcoins-parsed-rates")
                 .fieldsGrouping("bitcoins-parsed-blocks", new Fields("foundBy"));
         

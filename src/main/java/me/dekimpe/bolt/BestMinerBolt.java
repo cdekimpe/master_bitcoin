@@ -26,6 +26,7 @@ public class BestMinerBolt extends BaseWindowedBolt {
 
 	@Override
 	public void execute(TupleWindow inputWindow) {
+            boolean goOn = false;
             int timestamp = 0;
             int totalEurTuples = 0;
             double totalEurValue = 0;
@@ -47,7 +48,11 @@ public class BestMinerBolt extends BaseWindowedBolt {
                     miners.putIfAbsent(foundBy, 0.0d);
                     miners.put(foundBy, reward + miners.get(foundBy));
                 }
-                timestamp = input.getIntegerByField("timestamp");
+                // Get timestamp from last tuple
+                if (input.contains("timestamp")) {
+                    timestamp = input.getIntegerByField("timestamp");
+                    goOn = true;
+                }
                 outputCollector.ack(input);
             }
             
@@ -63,7 +68,8 @@ public class BestMinerBolt extends BaseWindowedBolt {
             double averageEur = totalEurValue / totalEurTuples;
             double eurValue = bestMinerValue * averageEur;
             
-            outputCollector.emit(new Values(timestamp, bestMiner, bestMinerValue, eurValue, averageEur));            
+            if (goOn)
+                outputCollector.emit(new Values(timestamp, bestMiner, bestMinerValue, eurValue, averageEur));            
 	}
 
 	@Override

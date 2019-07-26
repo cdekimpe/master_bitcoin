@@ -37,11 +37,14 @@ public class HourlyMaxBolt extends BaseWindowedBolt {
     // Input example : {"timestamp": 1563961758, "amount": 0.00612958, "hash": "57fe6a1887f14d9df1036c8709a6daa1c5a2ccaae34a38ebb4235c5fb7386906"}
     @Override
     public void execute(TupleWindow inputWindow) {
+        
+        boolean goOn = false;
         int timestamp = 0;
         int totalEurTuples = 0;
         double totalEurValue = 0;
         double maxBitValue = 0;
         double newAmount;
+        
 		
         for (Tuple input : inputWindow.get()) {
             // If it is a Rate
@@ -57,14 +60,19 @@ public class HourlyMaxBolt extends BaseWindowedBolt {
                 }
             }
             // Get timestamp from last tuple
-            timestamp = input.getIntegerByField("timestamp");
+            if (input.contains("timestamp")) {
+                timestamp = input.getIntegerByField("timestamp");
+                goOn = true;
+            }
+            
             outputCollector.ack(input);
         }
         
         double averageEurValue = totalEurValue / totalEurTuples;
         double eurValue = maxBitValue * averageEurValue;
-
-        outputCollector.emit(new Values(timestamp, maxBitValue, eurValue, averageEurValue));
+        
+        if (goOn)
+            outputCollector.emit(new Values(timestamp, maxBitValue, eurValue, averageEurValue));
     }
     
 }
